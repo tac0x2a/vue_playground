@@ -10,6 +10,16 @@
 <body>
     <div id="app">
         <h1>{{message}}</h1>
+        <ol>
+            <li v-for="item in array">{{item}}</li>
+        </ol>
+        <p>{{out}}</p>
+        <input v-model="out">
+        <button v-on:click="handleClick">Click</button>
+
+        <p v-if="out">
+            Not Empty
+        </p>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
     <script src="main.js"></script>
