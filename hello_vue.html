@@ -8,21 +8,52 @@
 </head>
 
 <body>
+
+
     <div id="app">
         <h1>{{message}}</h1>
         <ol>
             <li v-for="item in array">{{item}}</li>
         </ol>
-        <p>{{out}}</p>
         <input v-model="out">
         <button v-on:click="handleClick">Click</button>
 
-        <p v-if="out">
-            Not Empty
+        <transition>
+            <p v-if="out">
+                Not Empty
+            </p>
+        </transition>
+
+        <h1>
+            <p>{{out}}</p>
+        </h1>
+
+        <p v-if="url">
+            <a v-bind:href="url" target="_blank">URL</a>
         </p>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
-    <script src="main.js"></script>
+
+    <div id="app2">
+        {{message}}
+
+        <!-- class, style はオブジェクトを展開してくれる -->
+        <p v-bind:class="{child: isChild, 'is-active': isActive }">
+            test
+        </p>
+        <p v-bind:style="{color: textColor, backgroundColor: bgColor }">
+            test
+        </p>
+
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="100" cy="75" r="10" fill="lightpink" v-bind:r="round" />
+        </svg>
+        <input type="range" min="0" max="50" v-model="round" />
+        <h1>{{round}}</h1>
+
+    </div>
+    <script src=" https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"> </script>
+    <script src="main.js">
+    </script>
 </body>
 
 </html>
