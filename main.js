@@ -24,6 +24,13 @@ new Vue({
         isActive: true,
         textColor: "blue",
         bgColor: "green",
-        round: 10
+        round: 10,
+        show: false
+    },
+
+    methods: {
+        toggle: function () {
+            this.show = !this.show
+        }
     }
 })
