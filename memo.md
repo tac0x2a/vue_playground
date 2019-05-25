@@ -9,7 +9,7 @@
 `app`はセレクタ(`#app`)に対応。
 アプリと配置する要素を紐付けることをマウントという。
 
-## ディレクトティブ
+## ディレクティブ
 + `<div key="id">`: "id" という文字列
 + `<div v-bind:key="id">`: `id` というJavaScriptの変数
 
@@ -18,19 +18,40 @@
 
 ```html
 <li v-for="i in items">{{i}}</li>
+<li v-for="(item, index) in items">{{i}}</li>
+
+ <!-- 要素ごとに条件でclass設定できたりする -->
+<li v-for="item in array" v-bind:class="{rainbow_badge: lv <= 50}" v-if="item != 'a'">
+
+```
+
+```html
+<!-- DOMごと消える  -->
+<div v-if="show">v-if {{show}}</div>
+<template v-if="show"></template>
+
+<!-- display: none で消える -->
+<div v-show="show">v-show {{show}} </div>
 ```
 
 
-
-
 ```html
-<p>{{out}}</p>
-<input v-model="out">
+<input v-model="out" />
+<input v-model="round" type="range" min="0" max="50" />
 ```
 
 ```html
 <button v-on:click="handleClick">Click</button>
 ```
+
+```html
+<p v-if="url">
+    <a v-bind:href="url" target="_blank">URL</a>
+</p>
+```
+
+
+
 ```js
 var app = new Vue({
     el: '#app',

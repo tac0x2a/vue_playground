@@ -9,11 +9,24 @@
 
 <body>
     <div id="app">
+
         <h1>{{message}}</h1>
-        <ol>
-            <li v-for="item in array">{{item}}</li>
-        </ol>
-        <input v-model="out">
+
+        <p>
+            <input v-model="itemName" />
+            <button v-on:click="addItem">AddItem</button>
+            <ul>
+                <li v-for="(item, idx) in array">
+                    <p>
+                        {{item}}
+                        <button v-on:click="removeItem(idx)">x</button>
+                    </p>
+                </li>
+            </ul>
+        </p>
+
+
+        <input v-model=" out">
         <button v-on:click="handleClick">Click</button>
 
         <transition>
@@ -58,8 +71,9 @@
                 src="https://ci5.googleusercontent.com/proxy/7k0ZWU1aDrWLveKhqGpKzgOLOPv_M4yHzugU7PD5XkXb_sbvsDEBYMHsQMyxXmSfkKwZcQSO1_KvYQ_L7C14pvrjeIG68FvE3WXBTfssQyQtr3bHb3fSBGwiCPnbwcoy9TyT120IaP3N6CGGfhZI_Ylg69N3NufdDJUrIOojlMlewY6G=s0-d-e1-ft#https://cdn.shopify.com/s/files/1/2292/0133/products/A_rest_6ba60be7-e2e4-42f3-ba50-9d7df2e3d718.jpg?v=1558651943" />
             {{show}}
         </template>
-
     </div>
+
+
     <script src=" https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
     <script src="main.js"></script>
 </body>
