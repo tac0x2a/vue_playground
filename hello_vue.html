@@ -1,81 +1,91 @@
 <!DOCTYPE html>
 <html lang="ja">
-
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>Vue.js PlayGround</title>
-    <link href="main.css" rel="stylesheet">
-</head>
+    <link href="main.css" rel="stylesheet" />
+  </head>
 
-<body>
-    <div id="app">
+  <body>
+    <!-- v-cloak ディレクティブつけると、インスタンスの準備ができるまで描画されない -->
+    <div id="app" v-cloak>
+      <h1>{{message}}</h1>
+      <h1 v-text="message" /></h1>
 
-        <h1>{{message}}</h1>
+      --------------
 
-        <p>
-            <input v-model="itemName" />
-            <button v-on:click="addItem">AddItem</button>
-            <ul>
-                <li v-for="(item, idx) in array">
-                    <p>
-                        {{item}}
-                        <button v-on:click="removeItem(idx)">x</button>
-                    </p>
-                </li>
-            </ul>
-        </p>
+      <div v-if="show">v-if {{show}}</div>
+      <div v-show="false">v-show {{show}} </div>
 
+      <input v-model="itemName" />
+      <button v-on:click="addItem">AddItem({{array.length}})</button>
+      <ul>
+        <li v-for="(item, idx) in array">
+          <p>
+            <button v-on:click="bracket(idx)">[ ]</button>
+            {{item}}
+            <button v-on:click="removeItem(idx)">x</button>
+          </p>
+        </li>
+      </ul>
 
-        <input v-model=" out">
-        <button v-on:click="handleClick">Click</button>
+      <input v-model="out" />
+      <button v-on:click="handleClick">Click</button>
 
+      <p v-if="out">
         <transition>
-            <p v-if="out">
-                Not Empty
-            </p>
+          Not Empty
         </transition>
+      </p>
 
-        <h1>
-            <p>{{out}}</p>
-        </h1>
+      <h1>
+        hello!! world
+        <p>{{out}}</p>
+      </h1>
 
-        <p v-if="url">
-            <a v-bind:href="url" target="_blank">URL</a>
-        </p>
+      <p v-if="url">
+        <a v-bind:href="url" target="_blank">URL</a>
+      </p>
     </div>
+    --------------------------------
+    <div id="app2" v-cloak>
+      <pre>
+            {{ $data }}
+      </pre>
 
-    <div id="app2">
-        {{message}}
+      {{message}}
 
-        <!-- class, style はオブジェクトを展開してくれる -->
-        <p v-bind:class="{child: isChild, 'is-active': isActive }">
-            test
-        </p>
-        <p v-bind:style="{color: textColor, backgroundColor: bgColor }">
-            test
-        </p>
+      <!-- class, style はオブジェクトを展開してくれる -->
+      <p :class="{a: isA, b: isB, c: isC }">
+        test
+      </p>
+      <p v-bind:style="{color: textColor, backgroundColor: bgColor }">
+        test
+      </p>
 
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-            <circle cx="100" cy="75" r="10" fill="lightpink" v-bind:r="round" />
-        </svg>
-        <input type="range" min="0" max="50" v-model="round" />
-        <h1>{{round}}</h1>
+      <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <circle cx="100" cy="75" r="10" fill="lightpink" v-bind:r="round" />
+      </svg>
+      <input type="range" min="0" max="50" v-model="round" />
+      <h1>{{round}}</h1>
 
-        <button v-on:click="toggle"> {{show}} </button>
+      <button v-on:click="toggle">{{show}}</button>
 
-        <div v-if="show">v-if {{show}}</div> <!-- DOMごと消える  -->
-        <div v-show="show">v-show {{show}} </div> <!-- display: none で消える -->
+      <div v-if="show">v-if {{show}}</div>
+      <!-- DOMごと消える  -->
+      <div v-show="show">v-show {{show}}</div>
+      <!-- display: none で消える -->
 
-        <template v-if="show">
-            <img v-bind:width="round * 10"
-                src="https://ci5.googleusercontent.com/proxy/7k0ZWU1aDrWLveKhqGpKzgOLOPv_M4yHzugU7PD5XkXb_sbvsDEBYMHsQMyxXmSfkKwZcQSO1_KvYQ_L7C14pvrjeIG68FvE3WXBTfssQyQtr3bHb3fSBGwiCPnbwcoy9TyT120IaP3N6CGGfhZI_Ylg69N3NufdDJUrIOojlMlewY6G=s0-d-e1-ft#https://cdn.shopify.com/s/files/1/2292/0133/products/A_rest_6ba60be7-e2e4-42f3-ba50-9d7df2e3d718.jpg?v=1558651943" />
-            {{show}}
-        </template>
+      <template v-if="show">
+        <img
+          v-bind:width="round * 10"
+          src="https://ci5.googleusercontent.com/proxy/7k0ZWU1aDrWLveKhqGpKzgOLOPv_M4yHzugU7PD5XkXb_sbvsDEBYMHsQMyxXmSfkKwZcQSO1_KvYQ_L7C14pvrjeIG68FvE3WXBTfssQyQtr3bHb3fSBGwiCPnbwcoy9TyT120IaP3N6CGGfhZI_Ylg69N3NufdDJUrIOojlMlewY6G=s0-d-e1-ft#https://cdn.shopify.com/s/files/1/2292/0133/products/A_rest_6ba60be7-e2e4-42f3-ba50-9d7df2e3d718.jpg?v=1558651943"
+        />
+        {{show}}
+      </template>
     </div>
-
 
     <script src=" https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
     <script src="main.js"></script>
-</body>
-
+  </body>
 </html>

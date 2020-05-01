@@ -1,8 +1,9 @@
 ルートのテンプレート
 ```html
 <body>
-    <div id="app"></div>
+  <div id="app">
     <!-- ここに書く -->
+  </div>
 </body>
 ```
 
@@ -10,58 +11,187 @@
 アプリと配置する要素を紐付けることをマウントという。
 
 ## ディレクティブ
-+ `<div key="id">`: "id" という文字列
-+ `<div v-bind:key="id">`: `id` というJavaScriptの変数
 
+[ディレクティブ](https://012-jp.vuejs.org/guide/directives.html)
+> ディレクティブとは、 DOM 要素に対して何かを実行することをライブラリに伝達する、マークアップ中の特別なトークンです。
+> Vue.js でのディレクティブのコンセプトは徹底的にシンプルです。Vue.js のディレクティブは、下記のフォーマットのように、接頭辞のついた HTML 属性の形でのみ表されます。
+
+
+基本は以下。
 `ディレクティブ`:`引数`.`修飾子` = `値`
+
 (ex) `v-bind:value.sync = "message"`
 
+
+### Text(`v-text="式"`, `{{式}}`)
 ```html
+<!-- dataオプションにmessageプロパティが登録されているとして  -->
+
+<!-- messageの値を表示 -->
+<h1 v-text="message"></h1>
+
+<!-- こう書く場合のほうが多そう -->
+<h1>{{message}}</h1>
+
+<!-- 42が表示される -->
+<h1>{{40+2}}</h1>
+```
+
+### 繰り返し(`v-for="ループっぽい式"`)
+```html
+<!-- dataオプションにitemsプロパティがリストとして登録されているとして  -->
+
 <li v-for="i in items">{{i}}</li>
 <li v-for="(item, index) in items">{{i}}</li>
 
  <!-- 要素ごとに条件でclass設定できたりする -->
 <li v-for="item in array" v-bind:class="{rainbow_badge: lv <= 50}" v-if="item != 'a'">
-
 ```
 
+`key`としてユニークな値をとるプロパティを指定することで、要素の識別と効率的な描画処理が可能になる。`key`がないと、リストが更新された際に、リスト内の全要素を再描画してしまう。(変化した要素をvueが特定できないため。)
 ```html
+<li v-for="item in array" :key="item.id">
+```
+
+
+### 条件
+式を評価した結果に応じて要素を消したりする。値の真偽値解釈はJavaScriptの条件式と同じ。
+
+#### `v-if="式"`, `v-show="式"`
+
+```html
+<!-- dataオプションにshowプロパティが登録されているとして  -->
+
 <!-- DOMごと消える  -->
 <div v-if="show">v-if {{show}}</div>
 <template v-if="show"></template>
 
-<!-- display: none で消える -->
+<!-- DOMには残るが、style="display: none;" 属性が付与されるため、消えたように見える -->
 <div v-show="show">v-show {{show}} </div>
 ```
 
++ `v-if`はDOMごと消えてるため、配下の要素で参照するプロパティの有無を条件に入れる等でエラー回避したりできる。また、監視が解除されて破棄されるため、次に描画されるときは状態が初期化されてしまう。`v-if`は単一な要素にしか付与で機内が、`template`要素に付与することで、`template`配下の要素をまとめて消したりできる。
++ `v-show`は消えたように見えるだけ。切り替え頻度が高いものはこちらを使うのが良い。
 
-```html
-<input v-model="out" />
-<input v-model="round" type="range" min="0" max="50" />
-```
+#### `v-else-if="式"`, `v-else`
+いわゆる`elseif`節や`else`節に相当。
+
+### function(`v-on:click="評価するとfunctionになる式"`, `v-on:click="評価するとfunctionになる式(引数,...)"`)
++ `v-on:click` ボタンクリック時にfunctionをコールする
 
 ```html
 <button v-on:click="handleClick">Click</button>
+
+<!-- 引数を与える場合は()で指定する。ループの中でインデックスを与えたりして使う -->
+<button v-on:click="bracket(42)">Click</button>
 ```
-
-```html
-<p v-if="url">
-    <a v-bind:href="url" target="_blank">URL</a>
-</p>
-```
-
-
 
 ```js
 var app = new Vue({
-    el: '#app',
-    data: {...}
-    methods: {
-        handleClick: function (event) {
-            alert(event.target)
-        }
-    }
+  el: '#app',
+  data: {...}
+  methods: {
+    handleClick: function (event) {
+      alert(event.target)
+    },
+    bracket: function (idx) {
+      // 配列の要素を置き換える場合は $set を使う必要がある。
+      // 代入すると配列要素が更新されただけになってしまうため、再描画されない。
+
+      // $set は値をリアクティブデータとして追加する。
+      this.$set(this.array, idx, "[" + this.array[idx] + "]")
+      }
+  }
 })
+```
+
+
+### データバインディング
+#### 属性のデータバインディング(`v-bind:属性名="属性値の式"`)
++ `<div key="id">`: "id" という文字列
++ `<div v-bind:key="id">`: `id` というJavaScriptの変数の値が展開される
+
+以下はどちらで書いても同じ
++ `<div v-bind:key="id">`
++ `<div :key="id">`
+
+
+
+直値で与えた属性と併用する例。
+```html
+<!-- dataオプションのurlプロパティは展開される。 -->
+<!-- 直値で与えた属性と同じ名前のプロパティを指定する場合、プロパティの値で上書きされる -->
+<a v-bind:href="url" href="https://default.com" target="_blank">URL</a>
+```
+
+#### クラスとスタイルのデータバインディング(`v-bind:class="{属性名: 条件式, ...}"`, `v-bind:style="{属性名: 式, ...}"`)
+オブジェクトや配列をバインドすると、クラス名やCSSプロパティとして展開される。
+
+```html
+<p v-bind:class="{a: isA, b: isB, c: isC }">
+<p v-bind:style="{color: textColor, backgroundColor: bgColor}">
+```
+
+```js
+var app = new Vue({
+  el: '#app',
+  data: {
+      isA: true,
+      isB: false,
+      isC: true,
+      textColor: 'blue',
+      bgColor: 'green',
+  }
+})
+```
+
+これで動かすと
+
+```html
+<p class="a c">
+<p style="color: blue; backgroundColor: green;">
+```
+
+となる。
+`class`で指定する式は条件式として評価され、真となる値だけが残るようだ。
+`style`の方は値が文字列として展開されるようだ。
+
+属性のデータバインディングと同じように、以下はどちらで書いても同じ。
++ `<p v-bind:class={...}>`
++ `<p :class={...}>`
+
+オブジェクトデータを直接渡すこともできる。
+
+```html
+<p v-bind:style="styleObject">
+```
+```js
+var app = new Vue({
+  el: '#app',
+  data: {
+      styleObject: {
+        color: 'blue',
+        backgroundColor: 'green'
+      }
+  }
+})
+```
+
+#### まとめてバインディングする(`v-bind="評価するとobjectになる式"`)
+以下はどちらで書いても同じ。
+
++ `<img v-bind:src="item.src" v-bind:alt="item.alt" v-bind:width="item.width" v-bind:height="item.height">`
++ `<img v-bind="item">`
+
+一部だけ書き換えることもできる。
+```html
+<img v-bind="item" v-bind:width="item.width*2">
+```
+
+### なんやっけこれ(`v-model="式"`)
+```html
+<input v-model="out" />
+<input v-model="round" type="range" min="0" max="50" />
 ```
 
 
@@ -85,10 +215,8 @@ https://ja.onsen.io/
 モバイル向けのUIを簡単につくれる。良さそう。
 
 
-
-
 ------------------------------------------
 # メモ
 
 `<ol>`: 連番
-`<ul>`: ・だけ
+`<ul>`: `・` だけ。
