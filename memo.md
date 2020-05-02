@@ -18,6 +18,7 @@ var app = new Vue({
 アプリと配置する要素を紐付けることをマウントという。
 `var app` に代入してもしなくてもよい。
 
+-----------------------------------------------------------
 ## ディレクティブ
 
 [ディレクティブ](https://012-jp.vuejs.org/guide/directives.html)
@@ -318,17 +319,63 @@ var app = new Vue({
 <input type="file" v-on:change="handleChange">
 ```
 
+### 算出プロパティ
+計算をキャッシュしておいて、`{{halfWidth}}`のように参照できる。
+```js
+var app = new Vue({
+  computed: {
+    halfWidth: function(){
+      ...
+      return width/2.0;
+    },
+    halfRect: function(){
+      return {
+        w: halfWidth,
+        h: width*0.6 / 2.0
+      }
+    }
+  }
+})
+```
+functionの中でリアクティブデータを参照している場合、値が変更されると再計算される。
+計算コストの高い処理結果をキャッシュするのに使える。例えばリストの絞り込み結果とか。
 
 
+### 監視
+```js
+var app = new Vue({
+  watch: {
+    監視対象のリアクティブデータやプロパティ: function(新しい値, 古い値){
+      ...
+    },
+  }
+})
+```
+フォームの入力を監視して、値が変更されたら検索APIコールして・・・みたいな使い方で動的検索ができる。
 
+### フィルタ
+```js
+var app = new Vue({
+  filters: {
+    bracket: function(v){
+      return "[" + v + "]"
+    },
+    upper: function(v){
+      return v.toUpeerCase()
+    }
+  }
+})
+```
+```html
+<p>{{ str | upper | bracket }}</p>
+```
+methodsとよく似ているが、文字列を加工するときは便利。
+パイプみたいになっていて、左から右へデータが流れていく。
 
+### カスタムディレクティブ
+`v-`から始まるディレクティブを自分で作れるらしい。
 
-
-
-
-
-
-
+-----------------------------------------------------------
 ## コンポーネント
 JavaScriptとテンプレート(HTML, CSS)を1つにまとめたもの。帰納単位に分離して開発する仕組み。
 
@@ -347,6 +394,162 @@ https://github.com/ElemeFE/element
 Onsen UI
 https://ja.onsen.io/
 モバイル向けのUIを簡単につくれる。良さそう。
+
+
+### コンポーネントを自作する
+
+グローバルに登録
+```js
+Vue.component('new-component', {
+  template: '<p>New Component!!</p>',
+  data: function(){
+    return {
+      ...
+    }
+  },
+  methods: {
+    ...
+  }
+})
+```
+```html
+<div id="app">
+  <!-- どのVueテンプレートからでも参照できる -->
+  <new-component></new-component>
+  <!-- <p>New Component!!</p> として表示される -->
+</div>
+```
++ `new Vue()`と同じように定義する。ただし、`data`はObjectを返すfunctionになっていなければならない。
++ `template`で指定するhtmlはツリーになってないとだめ。ルートは1つ。`<div>`とかでくくっておくのがよい。
++ コンポーネントはネストできる。
+
+ローカルへの登録
+```js
+var newComponent = {
+  template: '<p>New Component!!</p>'
+  data: function(){
+    return {
+      ...
+    }
+  },
+  methods: {
+    ...
+  }
+}
+
+var app = new Vue({
+  el: '#app',
+  components: {
+    //これで<new-components>が使用できるようになる
+    'new-components': newComponents
+  }
+})
+```
+基本的にローカル登録にしておいてスコープを絞っといたほうがいい。
+
+
+### コンポーネント間の通信
+#### ネストしたコンポーネントの親から子(props down)
+静的に値を渡す。引数の値渡しみたいな感じ？
+```html
+<!-- 親のテンプレート -->
+<child name='Mario', age=10></child>
+<child name='Luigi', age=8></child>
+```
+```js
+Vue.component('child', {
+  template: '<p>{{name}}({{age}})</p>',
+
+  props: ['name', 'age'] //ここで受け取る属性を指定する
+
+// 型指定することもできる
+// props: {
+//   name: String
+//   age: Number
+// }
+})
+```
+
+リアクティブデータを渡す場合
+```html
+<child v-bind:name='Mario', age=10></child>
+```
+これで、親側で`name`を変更すると、子のnameが変更される。
+
+#### ネストしたコンポーネントの子から親(event up)
+```html
+<!-- 親 -->
+<child v-on:child-event="parentsHandler"></child>
+```
+```js
+// 子
+this.$emit('child-event')
+```
+`$emit('イベント名', 引数,...,)`を使う。子要素のボタンを押したときに、親要素をどうこうしたいときに。
+
+#### 親子で双方向のデータバインディングする(`v-model`)
+```html
+<!-- 親 -->
+<child v-model:"date"></child>
+
+<!-- 上記は以下の糖衣構文 -->
+<child v-bind:value="date" v-on:input="date = $event"></child>
+```
+```js
+// 子から以下のように$emitすることで、dateが自動で更新される。
+// v-modelで子へ渡されるプロパティはvalueなので、子側のpropsに指定するのを忘れないように！
+this.$emit('input', '20210-04-28')
+```
+
+いくつもバインドする場合は `.sync` 修飾子を使う。
+
+
+#### 親子ではないコンポーネント間
+```js
+var bus = new Vue() //イベントバス。
+
+var bus = new Vue({
+  data: {
+      ... //値をもたせることもできる。
+  }
+})
+
+```
+というのを作っておいて
+
+```js
+// 受け取る方
+bus.$on('何らかの-event', function(){
+  ...
+})
+```
+```js
+// eventを発行する方
+bus.$emit('何らかの-event')
+```
+
+### スロット
+親コンポーネントから、子コンポーネントのテンプレートの一部に何かを差し込むのに使う機能。
+```html
+<!-- 子のテンプレート -->
+<p>ここに入る→ <slot></slot><p>
+```
+
+```html
+<!-- 親 -->
+<child>これを入れる</child>
+
+<!-- するとこんな感じになる -->
+<p>ここに入る→ これを入れる</p>
+```
+`<slot>` タグが置き換わる。 `<slot name=''>` とすることで複数のスロットを名前付きで挿入することができる。
+
+ほかにもいろいろ使えるらしい。
+
+
+
+
+
 
 
 ------------------------------------------

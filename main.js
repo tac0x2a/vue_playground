@@ -1,3 +1,7 @@
+Vue.component("new-component", {
+  template: "<p>New Component!!</p>",
+})
+
 new Vue({
   el: "#app", //# マウントする要素。html上の `<div id="app">` と対応する。
 
@@ -8,7 +12,7 @@ new Vue({
     array: ["a", "b", "c"],
     out: "Blank",
     select: "えらんでね",
-    selectMulti: "いくつかえらんでね",
+    selectMulti: [],
     poke: "どれにする？",
     url: "https://www.tac42.net",
     show: true,
@@ -59,6 +63,12 @@ new Vue({
     round: 10,
     col: "#008000",
     show: false,
+  },
+
+  computed: {
+    cmp: function () {
+      return this.round * 2;
+    },
   },
 
   methods: {
