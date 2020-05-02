@@ -7,8 +7,16 @@
 </body>
 ```
 
+```js
+var app = new Vue({
+  el: '#app',
+  ...
+})
+```
+
 `app`はセレクタ(`#app`)に対応。
 アプリと配置する要素を紐付けることをマウントという。
+`var app` に代入してもしなくてもよい。
 
 ## ディレクティブ
 
@@ -75,36 +83,6 @@
 
 #### `v-else-if="式"`, `v-else`
 いわゆる`elseif`節や`else`節に相当。
-
-### function(`v-on:click="評価するとfunctionになる式"`, `v-on:click="評価するとfunctionになる式(引数,...)"`)
-+ `v-on:click` ボタンクリック時にfunctionをコールする
-
-```html
-<button v-on:click="handleClick">Click</button>
-
-<!-- 引数を与える場合は()で指定する。ループの中でインデックスを与えたりして使う -->
-<button v-on:click="bracket(42)">Click</button>
-```
-
-```js
-var app = new Vue({
-  el: '#app',
-  data: {...}
-  methods: {
-    handleClick: function (event) {
-      alert(event.target)
-    },
-    bracket: function (idx) {
-      // 配列の要素を置き換える場合は $set を使う必要がある。
-      // 代入すると配列要素が更新されただけになってしまうため、再描画されない。
-
-      // $set は値をリアクティブデータとして追加する。
-      this.$set(this.array, idx, "[" + this.array[idx] + "]")
-      }
-  }
-})
-```
-
 
 ### データバインディング
 #### 属性のデータバインディング(`v-bind:属性名="属性値の式"`)
@@ -188,11 +166,167 @@ var app = new Vue({
 <img v-bind="item" v-bind:width="item.width*2">
 ```
 
-### なんやっけこれ(`v-model="式"`)
+### イベントハンドリング(`v-on:click="評価するとfunctionになる式"`, `v-on:click="式"`)
++ `v-on:click` ボタンクリック時
++ `v-on:load` 画像などの読み込みが完了したとき
++ `v-on:scroll` 要素のスクロールイベント
++ `v-on:mousewheel` マウスホイールイベント
++ `v-on:dragstart` ドラッグ
++ `v-on:input` inputに値が入力された
+
+
+```html
+<button v-on:click="handleClick">Click</button>
+
+<!-- 引数を与える場合は()で指定する。ループの中でインデックスを与えたりして使う -->
+<button v-on:click="bracket(42)">Click</button>
+```
+
+```js
+var app = new Vue({
+  ...
+  methods: {
+    handleClick: function (event) {
+      alert(event.target)
+    },
+    bracket: function (idx) {
+      // 配列の要素を置き換える場合は $set を使う必要がある。
+      // 代入すると配列要素が更新されただけになってしまうため、再描画されない。
+
+      // $set は値をリアクティブデータとして追加する。
+      this.$set(this.array, idx, "[" + this.array[idx] + "]")
+      }
+  }
+})
+```
+
+以下はどちらで書いても同じ。
+
++ `<button v-on:click="bracket(42)">Click</button>`
++ `<button @click="bracket(42)">Click</button>`
+
+もとのイベントはこんな感じで拾える。
+```html
+<button v-on:click="handleClick($event)">Click</button>
+```
+```js
+var app = new Vue({
+    ...
+    handleClick: function (event) {
+      alert(event.target)
+    },
+    ...
+})
+```
+
+[イベントの修飾子についてはこちら](https://jp.vuejs.org/v2/guide/events.html#%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88%E4%BF%AE%E9%A3%BE%E5%AD%90)
+
+
+コンポーネントは`v-on`でイベントをハンドルできるが、`window`や`body`については`addeventListener`メソッドで登録しておく必要がある。
+
+### フォーム入力バインディング(`v-model="リアクティブデータの変数"`)
+input 要素 や textarea 要素、 select 要素に双方向 (two-way) データバインディングを作成し、指定したリアクティブデータの変数に入力値がセットされる。
+
 ```html
 <input v-model="out" />
 <input v-model="round" type="range" min="0" max="50" />
 ```
+
+`v-model`を使わずに、`v-bind`や`v-on`で頑張ることもできる。自分でバリデーションしたいときはこっち？
+```html
+<input v-bind:value="out" v-on:input="handleInput" />
+```
+```js
+var app = new Vue({
+  ...
+  methods: {
+    // 10文字未満に制限する
+    handleInput: function (event) {
+      if (event.target.value.length < 10) {
+        this.out = event.target.value;
+      }
+    },
+  }
+  ...
+})
+```
+
+いろいろ
+```html
+<!-- 文字列 -->
+<input v-model="out" />
+
+<!-- 複数行であっても文字列 -->
+<textarea v-model="out" />
+
+<!-- v-model.numberとすることで、プロパティに数値として値を設定できる -->
+<input type="range" v-model.number="r">
+
+<!-- "#008000" みたいな文字列 -->
+<input type="color" v-model="col">
+
+<!-- ラジオボックスは文字列 -->
+<input type="radio" value="フシギダネ" v-model="poke"> フシギダネ キミにきめた！ </label>
+<input type="radio" value="ヒトカゲ" v-model="poke"> ヒトカゲ キミにきめた！ </label>
+<input type="radio" value="ゼニガメ" v-model="poke"> ゼニガメ キミにきめた！ </label>
+
+<!-- 択一なselectは文字列 -->
+<select v-model="out">
+  <option disabled="disabled">以下から選択！</option>
+  <option value="a"> A </option>
+  <option value="b"> B </option>
+  <option value="c"> C </option>
+</select>
+
+<!-- 複数選択のselectは配列 -->
+<select v-model="out" multiple>
+  <option disabled="disabled">以下から選択！</option>
+  <option value="a"> A </option>
+  <option value="b"> B </option>
+  <option value="c"> C </option>
+</select>
+
+<!-- チェックボックスはBoolean。値を指定することもできる -->
+<input v-model="out" type="checkbox" />
+<input v-model="out" type="checkbox" true-value="真" false-value="偽" />
+```
+
+複数のチェックボックスは配列にもできる
+```html
+<label><input v-model="array" type="checkbox" value="a"> A </label>
+<label><input v-model="array" type="checkbox" value="b"> B </label>
+<label><input v-model="array" type="checkbox" value="c"> C </label>
+
+<!-- AとCにチェックを入れると ["a", "c"] になる -->
+<p>{{array}}</p>
+```
+```js
+var app = new Vue({
+  ...
+  data: {
+    array: []
+  }
+  ...
+})
+```
+
+[修飾子についてはこちら](https://jp.vuejs.org/v2/guide/forms.html#%E4%BF%AE%E9%A3%BE%E5%AD%90)
+数値に変換したり(`.number`)、余白を取り除いたり(`.trim`)できる。
+
+なお、画像などの`type="file"`は`v-model`を使えないので、`change`イベントをハンドルする。
+```html
+<input type="file" v-on:change="handleChange">
+```
+
+
+
+
+
+
+
+
+
+
 
 
 ## コンポーネント
@@ -218,5 +352,5 @@ https://ja.onsen.io/
 ------------------------------------------
 # メモ
 
-`<ol>`: 連番
-`<ul>`: `・` だけ。
++ `<ol>`: 連番
++ `<ul>`: `・` だけ。

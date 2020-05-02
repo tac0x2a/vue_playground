@@ -9,6 +9,11 @@
   <body>
     <!-- v-cloak ディレクティブつけると、インスタンスの準備ができるまで描画されない -->
     <div id="app" v-cloak>
+        <pre>
+            {{ $data }}
+          </pre>
+
+
       <h1>{{message}}</h1>
       <h1 v-text="message" /></h1>
 
@@ -29,8 +34,36 @@
         </li>
       </ul>
 
-      <input v-model="out" />
       <button v-on:click="handleClick">Click</button>
+      <button v-on:click="handleClick(42)" draggable>Click</button>
+      <button @click="message+='hoge'">Click</button>
+
+      <input v-model="out" />
+
+      <input v-bind:value="out" v-on:input="handleInput" />
+
+      <select v-model="select">
+        <option disabled="disabled">以下から選択！</option>
+        <option value="a"> A </option>
+        <option value="b"> B </option>
+        <option value="c"> C </option>
+      </select>
+      <p>{{select}}</p>
+
+      <select v-model="selectMulti" multiple>
+        <option disabled="disabled">以下から選択！</option>
+        <option value="a"> A </option>
+        <option value="b"> B </option>
+        <option value="c"> C </option>
+      </select>
+      <p>{{selectMulti}}</p>
+
+
+
+      <input type="radio" value="フシギダネ" v-model="poke"> フシギダネ キミにきめた！ </label>
+      <input type="radio" value="ヒトカゲ" v-model="poke"> ヒトカゲ キミにきめた！ </label>
+      <input type="radio" value="ゼニガメ" v-model="poke"> ゼニガメ キミにきめた！ </label>
+      <p>{{poke}}</p>
 
       <p v-if="out">
         <transition>
@@ -50,7 +83,7 @@
     --------------------------------
     <div id="app2" v-cloak>
       <pre>
-            {{ $data }}
+        {{ $data }}
       </pre>
 
       {{message}}
@@ -75,6 +108,9 @@
       <!-- DOMごと消える  -->
       <div v-show="show">v-show {{show}}</div>
       <!-- display: none で消える -->
+
+      <input type="color" v-model="col">
+      <p>{{col}}</p>
 
       <template v-if="show">
         <img

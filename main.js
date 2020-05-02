@@ -7,6 +7,9 @@ new Vue({
     itemName: "item",
     array: ["a", "b", "c"],
     out: "Blank",
+    select: "えらんでね",
+    selectMulti: "いくつかえらんでね",
+    poke: "どれにする？",
     url: "https://www.tac42.net",
     show: true,
   },
@@ -15,6 +18,9 @@ new Vue({
     // イベントハンドラを書いたり、処理を分割するのにつかう
     handleClick: function (event) {
       alert(this.out);
+    },
+    handleClick: function (i, event) {
+      alert(this.out + "" + i);
     },
     removeItem: function (idx) {
       this.array.splice(idx, 1);
@@ -27,6 +33,12 @@ new Vue({
     bracket: function (idx) {
       // 要素を置き換える場合は $set で。
       this.$set(this.array, idx, "[" + this.array[idx] + "]");
+    },
+
+    handleInput: function (event) {
+      if (event.target.value.length < 10) {
+        this.out = event.target.value; //別の変数の値を更新する
+      }
     },
   },
 });
@@ -45,6 +57,7 @@ new Vue({
     textColor: "blue",
     bgColor: "green",
     round: 10,
+    col: "#008000",
     show: false,
   },
 
