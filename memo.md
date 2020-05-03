@@ -628,6 +628,62 @@ p {
 + `<style>`: CSSの部分。`scoped` にすると、このコンポーネントとその配下のコンポーネントで有効になる。こちらも`lang=stylus`でStylusで書けたりする。
 
 
+## Vuex
+[Vuexとは何か?](https://vuex.vuejs.org/ja/)
+> Vuex は Vue.js アプリケーションのための 状態管理パターン + ライブラリ
+
+> あなたのアプリがシンプルであれば、Vuex なしで問題ないでしょう。
+
+コンポーネント横断で使えるリアクティブなグローバル変数群？
+
+###### `src/store.js`
+```js
+const store = new Vuex.Store({
+  state: {
+    count: 0
+  },
+  mutations: {
+    increment: state => state.count++
+  }
+})
+
+export default store
+```
+
+```js
+import store from '@/store.js' // @はsrcのエイリアス
+
+console.log(store.state.count) // -> 0
+store.commit('mutation')
+console.log(store.state.count) // -> 1
+```
+
+複数のコンポーネントで使う場合は`new Vue`するときに指定する
+###### `src/App.vue`
+```js
+import store from './store.js'
+new Vue({
+  ...
+  store,
+  ...
+})
+```
+
+`適当なコンポーネント.vue`
+```js
+export default {
+  craeted() {
+    console.log(this.$store.state.count)
+    this.$store.commit('increment')
+  }
+}
+```
+`this.$state` でアクセスする。
+
+
+
+
+
 ------------------------------------------
 # ES2015(ES6)関連
 ## 文法いろいろ
