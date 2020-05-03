@@ -630,6 +630,55 @@ p {
 
 ------------------------------------------
 # ES2015(ES6)関連
+## 文法いろいろ
+```js
+// 変数宣言
+// var x = 0 //スコープ広い
+let x = 0 //スコープ内でのみ有効
+const y = 42 //再代入不可
+
+// function
+new Vue({
+  methods: {
+    // 以下は handle: function(){ ... } と同じ。
+    // プロパティとして関数を宣言するときは function を省略できる。
+    handle(){  ...  }
+  }
+})
+
+//アロー関数
+let hoge = () => "hoge"
+let fuga = arg => "fuga and " + arg
+let piyo = (arg1, arg2) => {
+  let joined = arg1 + "piyo" + arg2;
+  return joined;
+}
+
+//テンプレートリテラル
+let template = `
+  <div class="sample">
+    <p>${ this.variable }</p>
+  </div>`
+
+// オブジェクトプロパティのショートバンド
+let short = {
+  hoge, fuga // 変数名がプロパティの名前になる
+}
+// let short = {
+//   hoge: hoge,
+//   fuga: fuga
+// }
+
+// 多重代入(分割代入)
+let [a,b] = [1,2] // aに1, bに2が代入される
+let { a } = {a:'A', b:'B', c:'C'} // a に 'A'が 代入される
+
+// スプレッド演算子
+let args = [1,2]
+piyo(...args) // piyo(1,2)と同義
+let args_ex = [ ...args, 3] // [1,2,3]
+```
+
 ## モジュール定義とインポート
 ###### Sample.js
 ```js
