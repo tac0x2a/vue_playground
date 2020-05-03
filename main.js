@@ -35,6 +35,7 @@ new Vue({
       this.array.push(this.itemName);
     },
     bracket: function (idx) {
+      component = hoge;
       // 要素を置き換える場合は $set で。
       this.$set(this.array, idx, "[" + this.array[idx] + "]");
     },

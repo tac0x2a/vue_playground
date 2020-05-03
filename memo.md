@@ -1,4 +1,5 @@
-ルートのテンプレート
+# Vue.js の基本
+基本ルートのテンプレート
 ```html
 <body>
   <div id="app">
@@ -548,12 +549,136 @@ bus.$emit('何らかの-event')
 
 
 
+------------------------------------------
+# Vue でアプリを作る
++ Vuex: 状態管理用ライブラリ。複数コンポーネントでのデータ共有や、アプリの状態の一元管理を行う。
++ Vue Router: 複数の画面とURLを紐付ける、SPA構築用ライブラリ
 
+
+
+
+### Vue CLI
+アプリ構築用ツール郡のCLI。
+かんたんにwebpackで単一ファイルコンポーネントを作ることができる。
+
+[webpackとは](https://qiita.com/soarflat/items/28bf799f7e0335b68186#webpack%E3%81%A8%E3%81%AF)
+
+内部ではBabel使ってるらしい。
+
+### Vue
+単一ファイルコンポーネント(SFC, Single File Components) として、 HTML/JavaScript/CSSをまとめた `.vue`ファイル単位で管理する。
+
+###### index.html
+```html
+<div id="app"></div>
+```
+
+###### index.js
+```js
+import Vue from "vue";
+import App from "./Hello";
+
+Vue.config.productionTip = false;
+
+new Vue({
+  el: "#app",
+  template: "<App/>",
+  components: { App }
+});
+```
+
+###### Hello.vue
+```html
+<template>
+  <p>{{ greeting }} World!</p>
+</template>
+
+<script>
+export default {
+  data: function() {
+    return {
+      greeting: "Hello"
+    }
+  }
+};
+</script>
+
+<style scoped>
+p {
+  font-size: 2em;
+  text-align: center;
+}
+</style>
+```
+
++ `<template>` : コンポーネントのテンプレート部分。必要なパッケージ入れて `lang="jade"` とすると Jadeで書けたりする。
++ `<script>`: コンポーネントのテンプレート以外の部分。
++ `<style>`: CSSの部分。`scoped` にすると、このコンポーネントとその配下のコンポーネントで有効になる。こちらも`lang=stylus`でStylusで書けたりする。
+
+
+------------------------------------------
+# ES2015(ES6)関連
+## モジュール定義とインポート
+###### Sample.js
+```js
+var state = {
+  count: 1
+}
+
+export default state
+```
+
+`export default state` は、デフォルトのimport文で呼ばれたときに返すデータを定義している。
+```js
+import Sample from './Sample.js'
+```
+みたいに書くと、stateのオブジェクトをSampleという変数名としてインポートする。
+
+
+### `export default` vs `module.exports =`
+
+[こちら参照](https://qiita.com/kiyodori/items/01d07d5c0659e539ecb9)
+> ・基本的にはexport defaultを使う
+> ・複数のモジュールをexportするときはexportを使う
+> ・受け取り側はimportを使う
+
+### `require` vs `import`
+
+[こちら参照](https://qiita.com/minato-naka/items/39ecc285d1e37226a283)
+> モジュール読み込みの仕様の主要なものとして、ESM (ECMAScript Modules)とCJS (CommonJS Modules)があります。
+> importを使うのがESM方式で、requireを使うのがCJS方式
+> require文は、CommonJSの仕様で、Nodejsの環境で動作してくれる書き方です。Nodejs環境ということはつまり、サーバサイドでの実行ということになります。
+
+import を使うのが良さそう。
 
 
 
 ------------------------------------------
 # メモ
 
+## 開発環境
+### Ubuntu(WSL)環境にNode.jsをインストールする
+```sh
+$ sudo apt update
+$ sudo apt install nodejs npm
+$ sudo npm install n -g
+$ sudo n stable
+$ # sudo apt purge -y nodejs npm #古いのは消す
+```
+
+### Vue CLI
+```sh
+$ sudo npm install -g vue-cli
+```
+
+### VS Codeに入れた拡張
++ ESLint
++ Prettier
++ Veture (主な使い方は[ここ](https://vuejs.github.io/vetur/snippet.html)。[このあたり](https://biz-navi.site/vscode%EF%BC%8Bvetur/)も参考に。)
++ Vue Peek
++ Auto Rename Tag
+
+
+## いろいろ
 + `<ol>`: 連番
 + `<ul>`: `・` だけ。
