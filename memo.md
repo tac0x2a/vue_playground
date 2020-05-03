@@ -554,9 +554,6 @@ bus.$emit('何らかの-event')
 + Vuex: 状態管理用ライブラリ。複数コンポーネントでのデータ共有や、アプリの状態の一元管理を行う。
 + Vue Router: 複数の画面とURLを紐付ける、SPA構築用ライブラリ
 
-
-
-
 ### Vue CLI
 アプリ構築用ツール郡のCLI。
 かんたんにwebpackで単一ファイルコンポーネントを作ることができる。
@@ -565,7 +562,22 @@ bus.$emit('何らかの-event')
 
 内部ではBabel使ってるらしい。
 
-### Vue
+#### プロジェクトを作る
+[参考: Creating Project](https://cli.vuejs.org/guide/creating-a-project.html#vue-create)
+```shell
+$ vue create <プロジェクト名>
+  # 対話形式で色々設定する。 `vue ui` でブラウザから同様のプロジェクト作成を行える。
+$ cd <プロジェクト名>
+$ npm run serve
+```
+
+http://localhost:8080/ にアクセスすると、アプリ画面が表示される。
+
+[参考: Vue CLI3について](https://cr-vue.mio3io.com/guide/chapter7.html#vue-cli3-%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB)
+> ビルド設定のカスタマイズは、プロジェクトルートに vue.config.js というファイル作成してそこに追加していきます。
+
+
+### 単一ファイルコンポーネント(`.vue`ファイル)
 単一ファイルコンポーネント(SFC, Single File Components) として、 HTML/JavaScript/CSSをまとめた `.vue`ファイル単位で管理する。
 
 ###### index.html
@@ -663,12 +675,14 @@ $ sudo apt update
 $ sudo apt install nodejs npm
 $ sudo npm install n -g
 $ sudo n stable
-$ # sudo apt purge -y nodejs npm #古いのは消す
+$ # sudo apt purge -y nodejs npm #古いのは消すex
 ```
 
 ### Vue CLI
 ```sh
-$ sudo npm install -g vue-cli
+$ sudo npm install -g @vue/cli
+$ vue --version
+@vue/cli 4.3.1
 ```
 
 ### VS Codeに入れた拡張
