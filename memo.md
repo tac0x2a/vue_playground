@@ -681,7 +681,179 @@ export default {
 `this.$state` でアクセスする。
 
 
+## Vue Router
+コンポーネントとURLを紐付けてコンテンツを生成し、SPAを構築するための拡張ライブラリ。
 
+[Vue Router](https://router.vuejs.org/ja/)
+> Vue Router は Vue.js 公式ルータです。これは Vue.js のコアと深く深く統合されており、Vue.js でシングルページアプリケーションを構築します。機能は次の通りです:
+> ・ネストされたルート/ビューマッピング
+> ・モジュール式、コンポーネントベースのルータ構造
+> ・ルートパラメータ、クエリ、ワイルドカード
+> ・Vue.js の transition 機能による、transition エフェクトの表示
+> ・細かいナビゲーションコントロール
+> ・自動で付与される active CSS クラス
+> ・HTML5 history モードまたは hash モードと IE9 の互換性
+> ・カスタマイズ可能なスクロール動作
+
+### 準備
+```sh
+$ npm install vue-router
+```
+
+### 使ってみる
+慣例として、ルートに直接紐づくコンポーネントは`views`や`pages`のようなディレクトリにまとめることが多い。
+
+###### src/views/Home.vue
+```html
+<template>
+  <h1>Home</h1>
+</template>
+```
+
+###### src/views/Product.vue
+```html
+<template>
+  <h1>Product</h1>
+</template>
+```
+
+###### src/router.js
+```js
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+import Home from '@/views/Home.vue'
+import Product from '@/views/Product.vue'
+
+Vue.use(VueRouter)
+
+const router = new VueRouter({
+  routes: [
+    { path: '/', component: Home },
+    { path: '/product', component: Product },
+  ]
+})
+
+export default router
+```
+
+###### src/main.js
+```js
+import Vue from 'vue'
+import App from './App.vue'
+
+import router from '@/router.js'
+
+Vue.config.productionTip = false
+
+new Vue({
+  router: router,
+  render: h => h(App),
+}).$mount('#app')
+```
+
+###### src/App.vue
+```html
+<template>
+  <div id="app">
+    <nav>
+      <router-link to="/">Home</router-link>
+      <router-link to="/product">Product</router-link>
+    </nav>
+    <router-view />
+  </div>
+</template>
+```
+
+これで、 http://localhost:8080 にアクセスすると、"Home" と "Product" リンクが生成されて、クリックするとそれぞれのコンポーネントが `<router-view />`の位置に表示される。
+
+### ハッシュモードとヒストリーモード
+[HTML5 History モード](https://router.vuejs.org/ja/guide/essentials/history-mode.html)
+> vue-router のデフォルトは hash モード です - 完全な URL を hash を使ってシミュレートし、 URL が変更された時にページのリロードが起きません。
+> history モードを使用する時は、URL は "普通" に見えます e.g. http://oursite.com/user/id 。美しいですね!
+
+ヒストリーモードを有効にするには、`VueRouter`の`mode`プロパティを`'history'`にして、サーバの設定を変更する必要がある。
+
+###### src/router.js
+```js
+const router = new VueRouter({
+  mode: 'history',
+  routes: [...]
+})
+```
+
+###### nginxの例
+```
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+その他サーバの設定方法は[こちら](https://router.vuejs.org/ja/guide/essentials/history-mode.html#%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E8%A8%AD%E5%AE%9A%E4%BE%8B)参照。
+
+### ルート定義のオプション
+```js
+...
+const router = new VueRouter({
+  mode: 'history',
+  routes: [
+    {
+      name: 'prod',
+      path: '/product/:id', //URLからパラメータを受け取る場合はこう書く。
+      compnent: Product,
+      meta: { requiresAuth: true } //認証が必要な場合はtrue
+    }
+  ],
+  // リダイレクトの設定。リダイレクト先はパスまたは名前で指定する
+  { path: '/a', redirect: '/product' },
+  { path: '/a', redirect: { name: 'prod'} },
+})
+```
+
+受け取ったパラメータはこのように参照する。
+```js
+this.$route.params.id //URLパラメータを受け取る
+this.$route.query //クエリパラメータを受け取る場合はこう
+```
+`$route` は マッチしたルートの情報が入ったオブジェクト。
+
+### ナビゲーション
+```html
+<template>
+  <div id="app">
+
+    <!-- 基本はこれ -->
+    <router-link to="/product"></router-link>
+
+    <!-- テンプレートリテラルを使う場合。込み入った記述をするとき便利 -->
+    <!-- =より右をJavaScriptの式として評価したい場合は `:to` を使うっぽい -->
+    <router-link :to="`/product/${ id }`"></router-link>
+
+    <!-- aタグ以外で囲みたい場合は`tag`で指定する -->
+    <router-link to="/product" tag="button"></router-link>
+
+    <!-- objectで指定できる。パラメータを渡す場合に便利か -->
+    <!-- paramsを渡す場合は、routerにnameを登録しておく必要がある -->
+    <router-link :to="{ path: '/product' }"></router-link>
+    <router-link :to="{ path: '/product', query: { id: 42 } }"></router-link>
+    <router-link :to="{ name: 'prod', params: { id: 42 } }"></router-link>
+
+  </div>
+</template>
+```
+
+アクティブなルートにマッチする `router-link` には `.router-link-exact-active` や `.router-link-active` が付与されるので、簡単にハイライトできる。
+```css
+.router-link-exact-active {background: #ff00ff} //完全一致したルート
+.router-link-active {background: #ff00ff} //マッチしたパスを含むルート
+```
+
+
+コードから遷移するには `$router` に対していろいろやる
+```js
+this.$router.push('/product') // push, replace, go
+this.$router.push({name: 'prod', params: { id: 1}}) //router-linkのようにパラメータを渡すこともできる
+```
 
 
 ------------------------------------------
