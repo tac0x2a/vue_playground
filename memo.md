@@ -831,8 +831,8 @@ this.$route.query.id //クエリパラメータを受け取る場合はこう
 <template>
   <div>
     <h1>Product</h1>
-    <div v-if="$route.params.id">Param: ID:{{pid}}</div>
-    <div v-if="$route.query.id">Query: ID:{{qid}}</div>
+    <div v-if="pid">Param: ID:{{pid}}</div>
+    <div v-if="qid">Query: ID:{{qid}}</div>
   </div>
 </template>
 
@@ -902,8 +902,144 @@ this.$router.push({name: 'prod', params: { id: 1}}) //router-linkのようにパ
 
 
 
+### 動的ルートのサンプル
+ポケモン図鑑(Pokedex)を作る。データは `src/DummyPokedex.js`にハードコードしたダミーを使う。
 
+###### src/App.vue
+```html
+<template>
+  <div id="app">
+    <nav>
+      <router-link to="/">Home</router-link>
+      <router-link to="/pokemon">Pokedex</router-link>
+    </nav>
+    <img alt="Vue logo" src="./assets/logo.png" />
+    <p>
+      <router-view />
+    </p>
+  </div>
+</template>
 
+<script>
+export default {
+  name: "App"
+}
+</script>
+```
+
+###### src/api/DummyPokedex.js
+```js
+const pokedex = [
+  { number: 1, name: "フシギダネ", types: ["くさ", "どく"], height: 0.7, weight: 6.9 },
+  { number: 4, name: "ヒトカゲ", types: ["ほのお"], height: 0.6, weight: 8.5 },
+  { number: 7, name: "ゼニガメ", types: ["みず"], height: 0.5, weight: 9.0},
+]
+
+//ダミーデータとアクセス用のAPIを定義する
+export default {
+  fetchAll() { return pokedex },
+  findFirst(number) { return pokedex.find(p => p.number == number) },
+
+  // DB等から読み込んでるように振る舞わせるため、`setTimeout` で2秒後にコールバックする
+  asyncFindFirst(number, callback) {
+    setTimeout(() => {
+      callback(this.findFirst(number))
+    }, 2000) // 2000ms 後に callbackする
+  }
+}
+```
+
+###### src/router.js
+```js
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+import Home from '@/views/Home.vue'
+import Pokedex from '@/views/Pokedex.vue'
+import Pokemon from '@/views/Pokemon.vue'
+
+Vue.use(VueRouter)
+
+const router = new VueRouter({
+  routes: [
+    { path: '/', component: Home },
+    { path: '/pokemon', component: Pokedex },
+    {
+      path: '/pokemon/:number(\\d+)',
+      component: Pokemon,
+      props: route => ({
+        number: Number(route.params.number)
+      })
+    },
+  ]
+})
+
+export default router
+```
+
+###### src/Pokedex.vue
+```html
+<template>
+  <div>
+    <h1>Pokedex</h1>
+    <ul>
+      <!-- ポケモン一覧をを表示する -->
+      <li v-for="{number, name} in pokedex" :key="number">
+        <router-link :to="`/pokemon/${number}`">No.{{number}} {{name}}</router-link>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script>
+import Pokedex from '@/api/DummyPokedex.js'
+
+export default {
+  computed: {
+    pokedex: () => Pokedex.fetchAll()
+  }
+}
+</script>
+```
+
+###### src/Pokemon.vue
+```html
+<template>
+  <div>
+    <div v-if="pokemon">
+      <h1>No. {{pokemon.number}} {{pokemon.name}}</h1>
+      <h2>体長:{{pokemon.height}}[m] 重さ:{{pokemon.weight}}[kg]</h2>
+      <h2>タイプ</h2>
+      <p v-for="type in pokemon.types" :key="type">{{type}}</p>
+    </div>
+    <div v-else>
+      <h2>Loading...</h2>
+    </div>
+  </div>
+</template>
+
+<script>
+import Pokedex from '@/api/DummyPokedex.js'
+
+export default {
+  props: {number: Number},
+  data(){
+    return {pokemon: null}
+  },
+  // computed では this.numberを参照できないので、watch で numberを監視するように。
+  watch: {
+    number: {
+      handler(){
+        // 遅延読み込みした結果を格納する
+        Pokedex.asyncFindFirst(this.number, pokemon => {
+          this.pokemon = pokemon
+        })
+      }, immediate: true //ここがtrueじゃないと、すぐにhandlerが呼ばれない。
+    }
+  }
+}
+</script>
+```
 
 ------------------------------------------
 # ES2015(ES6)関連
