@@ -6,7 +6,9 @@
     </nav>
     <img alt="Vue logo" src="./assets/logo.png" />
     <p>
-      <router-view />
+      <transition name="viewwww">
+        <router-view />
+      </transition>
     </p>
   </div>
 </template>
@@ -19,11 +21,13 @@ export default {
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
   margin-top: 60px;
+  text-align: center;
+}
+.viewwww-enter-active {
+  transition: opacity 0.5s;
+}
+.viewwww-enter, .viewwww-leave-to {
+  opacity: 0;
 }
 </style>

@@ -977,7 +977,7 @@ const router = new VueRouter({
 export default router
 ```
 
-###### src/Pokedex.vue
+###### src/views/Pokedex.vue
 ```html
 <template>
   <div>
@@ -1002,7 +1002,7 @@ export default {
 </script>
 ```
 
-###### src/Pokemon.vue
+###### src/views/Pokemon.vue
 ```html
 <template>
   <div>
@@ -1040,6 +1040,81 @@ export default {
 }
 </script>
 ```
+
+`src/views/Pokemon.vue` の下に子コンポーネントを作る場合は、`src/views/Pokemon/*.vue` とするのがいいらしい。
+
+### 遷移アニメーション
+```html
+<transition name="viewwww">
+  <router-view />
+</transition>
+...
+<style>
+.viewwww-enter-active {
+  transition: opacity 0.5s;
+}
+.viewwww-enter, .viewwww-leave-to {
+  opacity: 0;
+}
+</style>
+```
+`name`に指定した`viewwww`が一致してないといけない。
+
+
+### ナビゲーションガード
+遷移を操作するためのフック。
++ `to()`: 遷移後のrouteオブジェクトを受け取る
++ `from()`: 遷移前のrouteオブジェクトを受け取る
++ `next()`: これを呼ぶとフックが解決してrouteの遷移が行われる。遷移を中止する場合は`next(false)`をコールする。`next('/pokemon')`などで任意のrouteにリダイレクトもできる。
+
+```js
+const router = new VueRouter({
+  routes: [
+    ...
+    {
+      path: '/pokemon',
+      component: Pokedex
+      beforeEnter(to, from, next){ //このrouteへ遷移する前に呼ばれる。
+        next() //遷移してもOKな場合に呼ぶ
+      }
+    },
+    ...
+  ]
+})
+//グローバルなガードも使える
+router.beforEeach((to, from, next) => {
+//コンポーネントガード解決前に呼ばれる
+...
+})
+
+router.afterResolve((to, from, next) => {
+//コンポーネントガード解決後に呼ばれる
+...
+});
+
+router.afterEeach((to, from) => { // 遷移が終わってから呼ばれるのでnextは使えない。
+//すべてのルートの遷移後に呼ばれる
+...
+});
+```
+
+```html
+<script>
+export default {
+  // beforeRoute{Enter, Update, Leave} が使える
+
+  beforeRouteEnter(to,from,next){
+    // この時点ではコンポーネントのインスタンスはまだ作られていないので、thisにアクセスできないことに注意。
+    next(vm => {
+      // vm には VueComponent が入っている
+      // このコールバックでthisにアクセスできる。
+    })
+  }
+}
+</script>
+```
+
+`beforEeach`とかで、認証認可のチェックができる？
 
 ------------------------------------------
 # ES2015(ES6)関連
