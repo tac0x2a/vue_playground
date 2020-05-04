@@ -800,7 +800,14 @@ const router = new VueRouter({
     {
       name: 'prod',
       path: '/product/:id', //URLからパラメータを受け取る場合はこう書く。
+      //path: '/product/:id(\\d+)', //正規表現で数字のみにマッチさせることもできる
       compnent: Product,
+      meta: { requiresAuth: true } //認証が必要な場合はtrue
+    },
+    {
+      name: 'prodlist',
+      path: '/product', // パラメータなしの場合はrouteを別にすることもできる。
+      compnent: ProductList,
       meta: { requiresAuth: true } //認証が必要な場合はtrue
     }
   ],
@@ -813,9 +820,47 @@ const router = new VueRouter({
 受け取ったパラメータはこのように参照する。
 ```js
 this.$route.params.id //URLパラメータを受け取る
-this.$route.query //クエリパラメータを受け取る場合はこう
+this.$route.query.id //クエリパラメータを受け取る場合はこう
 ```
 `$route` は マッチしたルートの情報が入ったオブジェクト。
+
+ちなみに、パラメータは`$route`ではなくpropsとして受け取っておいたほうがいい。ユニットテストがしやすいので。
+
+###### src/Product.vue
+```html
+<template>
+  <div>
+    <h1>Product</h1>
+    <div v-if="$route.params.id">Param: ID:{{pid}}</div>
+    <div v-if="$route.query.id">Query: ID:{{qid}}</div>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {pid: Number,  qid: Number} //受け取るパラメータ
+}
+</script>
+```
+
+###### src/router.js
+```js
+...
+const router = new VueRouter({
+  routes: [
+    { path: '/', component: Home },
+    { path: '/product', component: Product },
+    {
+      path: '/product/:id(\\d+)',
+      component: Product,
+      props: r => ({ qid: r.query.id,  pid: r.params.id}) //こんな感じで。
+    },
+  ]
+})
+...
+```
+
+
 
 ### ナビゲーション
 ```html
@@ -854,6 +899,10 @@ this.$route.query //クエリパラメータを受け取る場合はこう
 this.$router.push('/product') // push, replace, go
 this.$router.push({name: 'prod', params: { id: 1}}) //router-linkのようにパラメータを渡すこともできる
 ```
+
+
+
+
 
 
 ------------------------------------------
