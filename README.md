@@ -566,7 +566,7 @@ bus.$emit('何らかの-event')
 
 #### プロジェクトを作る
 [参考: Creating Project](https://cli.vuejs.org/guide/creating-a-project.html#vue-create)
-```shell
+```sh
 $ vue create <プロジェクト名>
   # 対話形式で色々設定する。 `vue ui` でブラウザから同様のプロジェクト作成を行える。
 $ cd <プロジェクト名>
@@ -1117,6 +1117,94 @@ export default {
 ```
 
 `beforEeach`とかで、認証認可のチェックができる？
+
+### axios
+[axios を利用した API の使用](https://jp.vuejs.org/v2/cookbook/using-axios-to-consume-apis.html)
+> Promise ベースの HTTP クライアント
+
+```sh
+$ npm install axios
+```
+
+```js
+const axios = require('axios').default
+// Make a request for a user with a given ID
+axios.get('/user?ID=12345')
+  .then(function (response) {
+    // handle success
+    console.log(response);
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });
+```
+
+## UI フレームワークを導入してみる
+### BootstrapVue
+
++ [Using module bundlers](https://bootstrap-vue.org/docs/#using-module-bundlers)
++ [Vue CLI 3](https://bootstrap-vue.org/docs/#vue-cli-3)
+
+```sh
+$ npm install bootstrap-view
+```
+
+###### src/main.js
+```js
+...
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+Vue.use(BootstrapVue)
+...
+```
+
+これでOK
+
+## Firebaseにデプロイしてみる
+```sh
+$ ls
+README.md        node_modules       package.json  src
+babel.config.js  package-lock.json  public        vue.config.js
+
+$ firebase login
+
+$ firebase init
+# Hostingを選択
+# ? What do you want to use as your public directory? public
+# ? Configure as a single-page app (rewrite all urls to /index.html)? Yes
+# ? File public/index.html already exists. Overwrite? No
+```
+
+`.firebaserc` はデプロイ先のプロジェクト名とかが入っているので、 `.gitignore`に加えておくと良い。
+
+###### firebase.json
+```json
+{
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
+```
+Vueはdistにデプロイ用のもろもろを吐き出すので、`"public":"public"` から `"public":"dist"`に変更しておく。
+
+
+
 
 ------------------------------------------
 # ES2015(ES6)関連
