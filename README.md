@@ -638,6 +638,8 @@ p {
 
 コンポーネント横断で使えるリアクティブなグローバル変数群？
 
+
+### 基本
 ###### `src/store.js`
 ```js
 const store = new Vuex.Store({
@@ -645,7 +647,22 @@ const store = new Vuex.Store({
     count: 0
   },
   mutations: {
-    increment: state => state.count++
+    // stateを変更するための関数群。
+    // state.commitしたときに呼ばれる
+    increment: state => state.count++,
+
+    setCount:(state, payload){
+      state.count = payload
+    }
+  },
+  getters: { // stateの値を取得するための関数群
+    count(state, getters, rootState, rootGetter){ //getters経由で他のgetterを使うこともできる。
+      return state.count
+    },
+    isLarge(state){ // getters等は受け取っても受け取らなくてもよい
+      // 引数をとるGetterも作れる。 state.getters.isLarge(42) のようにコールする
+      return op => state.count > op
+    }
   }
 })
 
@@ -655,10 +672,22 @@ export default store
 ```js
 import store from '@/store.js' // @はsrcのエイリアス
 
-console.log(store.state.count) // -> 0
-store.commit('mutation')
-console.log(store.state.count) // -> 1
+store.state.count         // -> 0
+state.getters.count      // -> false
+state.getters.isLarge(0) // -> false
+
+store.commit('increment')
+
+store.state.count         // -> 1
+state.getters.count       // -> 1
+state.getters.isLarge(0) // -> true
+
+store.commit('setCount', 42)
+store.state.count         // -> 42
 ```
+
+[Vuexのドキュメント](https://vuex.vuejs.org/ja/guide/getters.html)をみたところ、ストアの値をフィルタリングする場合や、共通の処理をコンポーネント間で共有したい場合に、getterを使っているようだ。
+
 
 複数のコンポーネントで使う場合は`new Vue`するときに指定する
 ###### `src/App.vue`
@@ -671,7 +700,7 @@ new Vue({
 })
 ```
 
-`適当なコンポーネント.vue`
+###### `適当なコンポーネント.vue`
 ```js
 export default {
   craeted() {
@@ -681,6 +710,59 @@ export default {
 }
 ```
 `this.$state` でアクセスする。
+
+引数を取るgetterは結果がキャッシュされないので、コンポーネントの算出プロパティに入れておくとよい。
+
+###### `適当なコンポーネント.vue`
+```js
+export default {
+  data: {
+    current: 42
+  }
+  computed: {
+    isLarge(){
+      return this.$state.getters.isLarge(this.current)
+    }
+  }
+}
+```
+
+mutation は satateを変更する唯一の方法。
+
+
+### actionsとdispatch
+###### `src/store.js`
+```js
+const store = new Vuex.Store({
+  state: {
+    searchResult: []
+  },
+  mutations: {
+    setSearchResult(state, payload){
+      state.searchResult = payload
+    }
+  },
+  getters: {
+    actions: {
+      // 非同期処理用。commitをコールして値を変更するのに使う。
+      // 非同期にストアに書き込む(検索結果をストアするとか)ときに使うのかな
+      //state.dispatchしたときに呼ばれる
+      search({ commit }, payload){
+        axios.get('/api/search', {param:{ query: payload}}).then(res, {
+          commit('setSearchResult', res.body)
+        })
+      },
+    }
+  }
+})
+
+export default store
+```
+
+```js
+$store.state.dispatch('search', 'ピカチュウ')
+```
+
 
 
 ## Vue Router
@@ -1202,6 +1284,12 @@ $ firebase init
 }
 ```
 Vueはdistにデプロイ用のもろもろを吐き出すので、`"public":"public"` から `"public":"dist"`に変更しておく。
+
+ビルドしてデプロイする
+```sh
+$ npm run build
+$ firebase deploy
+```
 
 
 
