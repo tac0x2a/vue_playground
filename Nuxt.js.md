@@ -155,6 +155,9 @@ https://ja.nuxtjs.org/guide/configuration
 ### Layout
 > layouts ディレクトリのすべてのファイル（第一階層）は、ページコンポーネントの layout プロパティでアクセス可能なカスタムレイアウトを作成します。
 
+モバイルとデスクトップでレイアウトを切り替えるみたいなことができる。
+
+`layouts/default.vue` がデフォルト。
 `layouts`配下にテンプレートとなるvueファイル作って、`pages`配下の各vueファイルから利用する。
 
 
@@ -183,6 +186,36 @@ https://ja.nuxtjs.org/guide/configuration
   </script>
   ```
 
-ブログのレイアウトみたいなものを作って
+`<nuxt/>` にページコンポーネントが展開される。
 
-layout プロパティについての詳細： layout プロパティ
+ブログの共通レイアウトみたいなものを作ったりできる。上記の様にLayoutを指定して使う。
+
+
+ エラーページをカスタマイズするには、`layouts/error.vue` を作る。
++ `layouts/error.vue`
+  ```html
+  <template>
+  <div class="container">
+      <h1 v-if="error.statusCode === 404">ページが見つかりません</h1>
+      <h1 v-else>エラーが発生しました</h1>
+      <nuxt-link to="/">ホーム</nuxt-link>
+    </div>
+  </template>
+
+  <script>
+  export default {
+    props: ['error'],
+    layout: 'blog' // エラーページ用のカスタムレイアウトを指定できます
+  }
+  </script>
+  ```
+
+
+
+### Page
+vueファイル。
+> Nuxt.js にユニバーサルアプリケーション開発を可能な限り容易にするための特別な属性と機能が追加されています。
+
+[こちら](https://ja.nuxtjs.org/guide/views#%E3%83%9A%E3%83%BC%E3%82%B8)参照。
+
+
